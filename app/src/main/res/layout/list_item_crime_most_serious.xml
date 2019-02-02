@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="60dp">
+    <LinearLayout
+        android:layout_weight="80"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/crime_title"
+            android:layout_weight="50"
+            android:paddingStart="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"/>
+        <TextView
+            android:id="@+id/crime_date"
+            android:layout_weight="50"
+            android:paddingStart="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/alice_blue"
+            android:background="@color/colorPrimaryDark"/>
+    </LinearLayout>
+    <ImageButton
+        android:id="@+id/police_button"
+        android:layout_weight="20"
+        android:background="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/police"/>
+</LinearLayout>

@@ -7,6 +7,7 @@ public class Crime {
     private UUID mID;
     private String mTitle;
     private Date mDate;
+    private boolean seriously;
     private boolean mSolved;
 
     public Crime() {
@@ -40,5 +41,13 @@ public class Crime {
 
     public UUID getID() {
         return mID;
+    }
+
+    public boolean isSeriously() {
+        return seriously;
+    }
+
+    public void setSeriously(boolean seriously) {
+        this.seriously = seriously;
     }
 }

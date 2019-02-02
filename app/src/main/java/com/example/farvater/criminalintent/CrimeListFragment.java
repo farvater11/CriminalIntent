@@ -11,10 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.zip.Inflater;
 
 
 public class CrimeListFragment extends Fragment {
@@ -44,6 +47,7 @@ public class CrimeListFragment extends Fragment {
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mTitleTextVIew;
         private TextView mDateTextView;
+        private ImageButton mCallPoliceButton;
         private Crime mCrime;
 
         public void bind(Crime crime){
@@ -61,9 +65,24 @@ public class CrimeListFragment extends Fragment {
             itemView.setOnClickListener(this);
         }
 
+        public CrimeHolder(LayoutInflater inflater, ViewGroup parent, boolean seriously){
+            super(inflater.inflate(R.layout.list_item_crime_most_serious, parent,false));
+
+            mTitleTextVIew = (TextView) itemView.findViewById(R.id.crime_title);
+            mDateTextView = (TextView) itemView.findViewById(R.id.crime_date);
+            mCallPoliceButton = (ImageButton) itemView.findViewById(R.id.police_button);
+
+            itemView.setOnClickListener(this);
+            mCallPoliceButton.setOnClickListener(this);
+        }
+
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(), mCrime.getTitle() +" clicked!", Toast.LENGTH_SHORT).show();
+            if(v.getId() == R.id.police_button)
+                Toast.makeText(getActivity(),mCrime.getTitle() + " calling to police!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getActivity(), mCrime.getTitle() +" clicked!", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -76,9 +95,12 @@ public class CrimeListFragment extends Fragment {
 
         @NonNull
         @Override
-        public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
+        public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int position) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new CrimeHolder(layoutInflater, parent);
+            if(getItemViewType(position)==1)
+                return new CrimeHolder(layoutInflater, parent, mCrimes.get(position).isSeriously());
+            else
+                return new CrimeHolder(layoutInflater, parent);
         }
 
         @Override
@@ -90,6 +112,13 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if(mCrimes.get(position).isSeriously())
+                return 1;
+            return 0;
         }
     }
 }
