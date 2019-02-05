@@ -24,7 +24,7 @@ import java.util.zip.Inflater;
 
 
 public class CrimeListFragment extends Fragment {
-
+    private static final int REQUEST_CRIME = 1;
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
 
@@ -35,16 +35,33 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        updateUI();
+        //updateUI();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CRIME){
+
+        }
     }
 
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
-
+        if(mAdapter == null){
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }
+        else
+            mAdapter.notifyDataSetChanged();
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -63,6 +80,7 @@ public class CrimeListFragment extends Fragment {
         }
 
         public CrimeHolder(LayoutInflater inflater, ViewGroup parent){
+
             super(inflater.inflate(R.layout.list_item_crime, parent,false));
 
             mTitleTextVIew = (TextView) itemView.findViewById(R.id.crime_title);
@@ -105,10 +123,10 @@ public class CrimeListFragment extends Fragment {
         @Override
         public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int position) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            if(getItemViewType(position)==1)
-                return new CrimeHolder(layoutInflater, parent, mCrimes.get(position).isSeriously());
-            else
+            if(getItemViewType(position) == 1)
                 return new CrimeHolder(layoutInflater, parent);
+            else
+                return new CrimeHolder(layoutInflater, parent, true);
         }
 
         @Override
@@ -124,9 +142,11 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if(mCrimes.get(position).isSeriously())
+            if(mCrimes.get(position).isSeriously()){
+                return 2;
+            }
+            else
                 return 1;
-            return 0;
         }
     }
 }

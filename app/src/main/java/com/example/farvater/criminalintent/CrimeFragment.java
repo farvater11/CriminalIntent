@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class CrimeFragment extends Fragment {
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private CheckBox mIsSeriouslyCheckBox;
 
 
     public static CrimeFragment newInstance(UUID uuid){
@@ -53,10 +55,14 @@ public class CrimeFragment extends Fragment {
         mTitleField = (EditText) v.findViewById(R.id.crime_title);
         mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
         mDateButton = (Button) v.findViewById(R.id.crime_date);
+        mIsSeriouslyCheckBox = (CheckBox) v.findViewById(R.id.is_seriously_checkbox);
 
         mTitleField.setText(mCrime.getTitle());
         mDateButton.setText(mCrime.getDate().toString());
         mSolvedCheckBox.setChecked(mCrime.isSolved());
+        mIsSeriouslyCheckBox.setChecked(mCrime.isSeriously());
+        mIsSeriouslyCheckBox.setEnabled(false);
+        Toast.makeText(getContext(),String.valueOf(mCrime.isSeriously()),Toast.LENGTH_SHORT).show();
 
 
         mTitleField.addTextChangedListener(new TextWatcher() {
@@ -84,6 +90,8 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+
+
 
 
         return v;
