@@ -106,7 +106,7 @@ public class CrimeListFragment extends Fragment {
             if(v.getId() == R.id.police_button)
                 Toast.makeText(getActivity(),mCrime.getTitle() + " calling to police!", Toast.LENGTH_SHORT).show();
             else{
-                startActivity(CrimeActivity.newIntent(getContext(),mCrime.getID()));
+                startActivity(CrimePagerActivity.newIntent(getContext(),mCrime.getID()));
             }
 
         }
