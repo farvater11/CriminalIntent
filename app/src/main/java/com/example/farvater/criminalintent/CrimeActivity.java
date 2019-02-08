@@ -12,6 +12,8 @@ import java.util.UUID;
 public class CrimeActivity extends SingleFragmentActivity {
 
     private static final String EXTRA_CRIME_ID = "com.example.farvater.criminalintent.crime_id";
+    private static final String EXTRA_CRIME_POS = "com.example.farvater.criminalintent.cur_pos";
+
 
     public static Intent newIntent(Context context, UUID crime_id){
         Intent intent = new Intent(context, CrimeActivity.class);
@@ -21,6 +23,6 @@ public class CrimeActivity extends SingleFragmentActivity {
 
     @Override
     public Fragment createFragment(){
-       return CrimeFragment.newInstance((UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID));
+       return CrimeFragment.newInstance((UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID),(int)getIntent().getSerializableExtra(EXTRA_CRIME_POS));
    }
 }
