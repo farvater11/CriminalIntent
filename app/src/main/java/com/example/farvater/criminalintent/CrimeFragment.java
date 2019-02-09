@@ -3,7 +3,9 @@ package com.example.farvater.criminalintent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -24,6 +27,8 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
 
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String ARG_CRIME_POS = "cur_pos";
+    private static final String DIALOG_DATE = "DialogDate";
+    private static final int REQUEST_DATE = 0;
     private Crime mCrime;
     private int mCurrentPosition;
     private EditText mTitleField;
@@ -74,19 +79,20 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mSolvedCheckBox.setChecked(mCrime.isSolved());
         mIsSeriouslyCheckBox.setChecked(mCrime.isSeriously());
         mIsSeriouslyCheckBox.setEnabled(false);
+        mDateButton.setOnClickListener(this);
         Toast.makeText(getContext(),String.valueOf(mCrime.isSeriously()),Toast.LENGTH_SHORT).show();
 
         if(mCurrentPosition == 0){
-            mFirstCrimeButton.setEnabled(false);
-            mLastCrimeButton.setEnabled(true);
+            mFirstCrimeButton.setVisibility(INVISIBLE);
+            mLastCrimeButton.setVisibility(VISIBLE);
         }
         else if(mCurrentPosition == CrimeLab.get(getActivity()).getCrimes().size()-1) {
-            mLastCrimeButton.setEnabled(false);
-            mFirstCrimeButton.setEnabled(true);
+            mFirstCrimeButton.setVisibility(VISIBLE);
+            mLastCrimeButton.setVisibility(INVISIBLE);
         }
         else {
-            mFirstCrimeButton.setEnabled(true);
-            mLastCrimeButton.setEnabled(true);
+            mFirstCrimeButton.setVisibility(VISIBLE);
+            mLastCrimeButton.setVisibility(VISIBLE);
         }
 
         mTitleField.addTextChangedListener(new TextWatcher() {
@@ -106,7 +112,6 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         });
 
         //mDateButton.setText(mCrime.getDate().toString());
-        mDateButton.setEnabled(false);
 
         mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
@@ -121,7 +126,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if(v.getId() == R.id.first_crime_button)
             CrimePagerActivity.resetCurrentItem(0);
-        if (v.getId() == R.id.last_crime_button)
+        else if (v.getId() == R.id.last_crime_button)
             CrimePagerActivity.resetCurrentItem((CrimeLab.get(getActivity()).getCrimes().size()-1));
+        else if (v.getId() == R.id.crime_date);{
+            FragmentManager fragmentManager = getFragmentManager();
+            DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+            dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+            dialog.show(fragmentManager,DIALOG_DATE);
+        }
     }
 }
