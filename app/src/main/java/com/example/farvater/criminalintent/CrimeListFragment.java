@@ -108,7 +108,6 @@ public class CrimeListFragment extends Fragment {
             else{
                 startActivity(CrimePagerActivity.newIntent(getContext(),mCrime.getID()));
             }
-
         }
     }
 
@@ -142,9 +141,8 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if(mCrimes.get(position).isSeriously()){
+            if(mCrimes.get(position).isSeriously())
                 return 2;
-            }
             else
                 return 1;
         }

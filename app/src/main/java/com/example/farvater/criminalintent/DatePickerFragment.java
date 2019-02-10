@@ -1,6 +1,8 @@
 package com.example.farvater.criminalintent;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,16 +15,17 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.zip.Inflater;
 
 public class DatePickerFragment extends DialogFragment {
     private static final String ARG_DATE="date";
-    private static final String EXTRA_DATE = "com.example.farvater.criminalintent.date";
+    public static final String EXTRA_DATE = "com.example.farvater.criminalintent.date";
 
 
     private DatePicker mDatePicker;
 
-    private void SendResult(int resultCode, Date date){
+    private void sendResult(int resultCode, Date date){
         if(getTargetFragment()==null)
             return;
         Intent intent = new Intent();
@@ -48,13 +51,25 @@ public class DatePickerFragment extends DialogFragment {
         int year = mCalendar.get(Calendar.YEAR);
         int month = mCalendar.get(Calendar.MONTH);
         int day = mCalendar.get(Calendar.DAY_OF_MONTH);
+        final int hour = mCalendar.get(Calendar.HOUR_OF_DAY);
+        final int minutes = mCalendar.get(Calendar.MINUTE);
 
         mDatePicker = (DatePicker) v.findViewById(R.id.dialog_date_picker);
         mDatePicker.init(year, month, day, null);
 
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.date_picker_title)
-                .setPositiveButton(android.R.string.ok,null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int year = mDatePicker.getYear();
+                        int month = mDatePicker.getMonth();
+                        int day = mDatePicker.getDayOfMonth();
+
+                        Date date = new GregorianCalendar(year,month,day,hour,minutes).getTime();
+                        sendResult(Activity.RESULT_OK, date);
+                    }
+                })
                 .setView(v)
                 .create();
     }
