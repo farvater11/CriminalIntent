@@ -29,6 +29,9 @@ public class CrimeLab {
         }
     }
 
+    public void addCrime(Crime c){
+        mCrimes.add(c);
+    }
 
 
     private List<Crime> mCrimes;
