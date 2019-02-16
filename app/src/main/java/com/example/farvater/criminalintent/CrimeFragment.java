@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -64,11 +65,10 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateDate() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(mCrime.getDate());
-        mDateButton.setText(calendar.get(Calendar.DAY_OF_MONTH) +"."+
-                (calendar.get(Calendar.MONTH) + 1) +"."+ calendar.get(Calendar.YEAR));
-        mTimeButton.setText(calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE '\n' MMM dd, YYYY");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        mDateButton.setText(dateFormat.format(mCrime.getDate()));
+        mTimeButton.setText(timeFormat.format(mCrime.getDate()));
     }
 
     @Override
@@ -154,10 +154,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         else if (v.getId() == R.id.last_crime_button)
             CrimePagerActivity.resetCurrentItem((CrimeLab.get(getActivity()).getCrimes().size()-1));
         else if (v.getId() == R.id.crime_date){
+            Intent intent = CrimeDatePickerActivity.newIntent(getActivity(), mCrime.getDate());
+            startActivityForResult(intent,REQUEST_DATE);
+            /*
             FragmentManager fragmentManager = getFragmentManager();
             DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
             dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-            dialog.show(fragmentManager,DIALOG_DATE);
+            dialog.show(fragmentManager,DIALOG_DATE);*/
         }
         else if(v.getId() == R.id.crime_time){
             FragmentManager fragmentManager = getFragmentManager();

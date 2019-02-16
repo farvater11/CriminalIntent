@@ -9,8 +9,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 
 import java.util.Calendar;
@@ -22,15 +25,16 @@ public class DatePickerFragment extends DialogFragment {
     private static final String ARG_DATE="date";
     public static final String EXTRA_DATE = "com.example.farvater.criminalintent.date";
 
-
     private DatePicker mDatePicker;
+    private Button mOkButton;
 
     private void sendResult(int resultCode, Date date){
-        if(getTargetFragment()==null)
-            return;
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DATE,date);
-        getTargetFragment().onActivityResult(getTargetRequestCode(),resultCode, intent);
+        if(getTargetFragment()==null)
+            getActivity().setResult(resultCode, intent);
+        else
+            getTargetFragment().onActivityResult(getTargetRequestCode(),resultCode, intent);
     }
 
     public static DatePickerFragment newInstance(Date date){
@@ -40,9 +44,10 @@ public class DatePickerFragment extends DialogFragment {
         datePickerFragment.setArguments(bundle);
         return datePickerFragment;
     }
-    @NonNull
+
+    @Nullable
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_date,null);
 
         Date mDate = (Date) getArguments().getSerializable(ARG_DATE);
@@ -57,20 +62,20 @@ public class DatePickerFragment extends DialogFragment {
         mDatePicker = (DatePicker) v.findViewById(R.id.dialog_date_picker);
         mDatePicker.init(year, month, day, null);
 
-        return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.date_picker_title)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int year = mDatePicker.getYear();
-                        int month = mDatePicker.getMonth();
-                        int day = mDatePicker.getDayOfMonth();
+        mOkButton = (Button) v.findViewById(R.id.button_ok);
+        mOkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int year = mDatePicker.getYear();
+                int month = mDatePicker.getMonth();
+                int day = mDatePicker.getDayOfMonth();
 
-                        Date date = new GregorianCalendar(year,month,day,hour,minutes).getTime();
-                        sendResult(Activity.RESULT_OK, date);
-                    }
-                })
-                .setView(v)
-                .create();
+                Date date = new GregorianCalendar(year,month,day,hour,minutes).getTime();
+                sendResult(Activity.RESULT_OK, date);
+                getActivity().getSupportFragmentManager().beginTransaction().remove(DatePickerFragment.this).commit();
+            }
+        });
+        return v;
     }
 }
+
