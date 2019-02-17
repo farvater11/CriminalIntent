@@ -29,13 +29,23 @@ import java.util.zip.Inflater;
 
 public class CrimeListFragment extends Fragment {
     private static final int REQUEST_CRIME = 1;
+    private static final String KEY_SUBTITLE = "key_visible_subtitle";
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private boolean mSubtitleVisible;
 
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_SUBTITLE,mSubtitleVisible);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null)
+            mSubtitleVisible = savedInstanceState.getBoolean(KEY_SUBTITLE);
         setHasOptionsMenu(true);
     }
 
@@ -106,6 +116,7 @@ public class CrimeListFragment extends Fragment {
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
+        updateSubtitle();
         if(mAdapter == null){
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);

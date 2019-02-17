@@ -43,6 +43,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private CheckBox mIsSeriouslyCheckBox;
     private ImageButton mFirstCrimeButton;
     private ImageButton mLastCrimeButton;
+    private ImageButton mDellCrimeButton;
 
 
     public static CrimeFragment newInstance(UUID uuid, int position){
@@ -75,7 +76,6 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCrime = new Crime();
-        //UUID crimeId = (UUID) getActivity().getIntent().getSerializableExtra(CrimeActivity.EXTRA_CRIME_ID);
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCurrentPosition = (int) getArguments().getInt(ARG_CRIME_POS);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
@@ -92,11 +92,12 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mDateButton = (Button) v.findViewById(R.id.crime_date);
         mTimeButton = (Button) v.findViewById(R.id.crime_time);
         mIsSeriouslyCheckBox = (CheckBox) v.findViewById(R.id.is_seriously_checkbox);
-
         mFirstCrimeButton = (ImageButton) v.findViewById(R.id.first_crime_button);
+        mDellCrimeButton = (ImageButton) v.findViewById(R.id.del_crime_button);
         mLastCrimeButton = (ImageButton) v.findViewById(R.id.last_crime_button);
         mFirstCrimeButton.setOnClickListener(this);
         mLastCrimeButton.setOnClickListener(this);
+        mDellCrimeButton.setOnClickListener(this);
 
         mTitleField.setText(mCrime.getTitle());
         updateDate();
@@ -156,17 +157,16 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         else if (v.getId() == R.id.crime_date){
             Intent intent = CrimeDatePickerActivity.newIntent(getActivity(), mCrime.getDate());
             startActivityForResult(intent,REQUEST_DATE);
-            /*
-            FragmentManager fragmentManager = getFragmentManager();
-            DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-            dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-            dialog.show(fragmentManager,DIALOG_DATE);*/
         }
         else if(v.getId() == R.id.crime_time){
             FragmentManager fragmentManager = getFragmentManager();
             TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mCrime.getDate());
             timePickerFragment.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
             timePickerFragment.show(fragmentManager,DIALOG_DATE);
+        }
+        else if(v.getId() == R.id.del_crime_button){
+            CrimeLab.get(getActivity()).remCrime(mCrime);
+            getActivity().finish();
         }
     }
 }
