@@ -9,6 +9,18 @@
         app:showAsAction="ifRoom|withText">
     </item>
     <item
+        android:id="@+id/new_serio_crime"
+        android:icon="@drawable/ic_add_serio_menu"
+        android:title="@string/new_serio_crime"
+        app:showAsAction="ifRoom|withText">
+    </item>
+    <item
+        android:id="@+id/rem_all_crimes"
+        android:icon="@drawable/ic_del_all_menu"
+        android:title="@string/rem_all_crimes"
+        app:showAsAction="ifRoom|withText">
+    </item>
+    <item
         android:id="@+id/show_subtitle"
         android:title="@string/show_subtitle"
         app:showAsAction="ifRoom">

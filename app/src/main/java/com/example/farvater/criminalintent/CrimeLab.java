@@ -36,6 +36,9 @@ public class CrimeLab {
     public void remCrime(Crime c){
         mCrimes.remove(c);
     }
+    public void remAllCrimes(){
+        mCrimes.clear();
+    }
 
 
     private List<Crime> mCrimes;

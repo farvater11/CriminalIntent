@@ -27,12 +27,14 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 
-public class CrimeListFragment extends Fragment {
+public class CrimeListFragment extends Fragment{
     private static final int REQUEST_CRIME = 1;
     private static final String KEY_SUBTITLE = "key_visible_subtitle";
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private boolean mSubtitleVisible;
+    private Button mNewCrimeButton;
+    private Button mNewSerioCrimeButton;
 
 
     @Override
@@ -55,10 +57,33 @@ public class CrimeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
         mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mNewCrimeButton = (Button) view.findViewById(R.id.new_crime_on_empty_screen);
+        mNewSerioCrimeButton = (Button) view.findViewById(R.id.new_serio_crime_on_empty_screen);
 
-        //updateUI();
+        mNewCrimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Crime crime = new Crime();
+                CrimeLab.get(getActivity()).addCrime(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getID());
+                startActivity(intent);
+            }
+        });
+        mNewSerioCrimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Crime crime = new Crime();
+                crime.setSeriously(true);
+                CrimeLab.get(getActivity()).addCrime(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getID());
+                startActivity(intent);
+            }
+        });
+        updateUI();
         return view;
     }
+
+
 
     @Override
     public void onResume() {
@@ -94,11 +119,22 @@ public class CrimeListFragment extends Fragment {
                 Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getID());
                 startActivity(intent);
                 return true;
+            case R.id.new_serio_crime:
+                Crime crime1 = new Crime();
+                crime1.setSeriously(true);
+                CrimeLab.get(getActivity()).addCrime(crime1);
+                Intent intent1 = CrimePagerActivity.newIntent(getActivity(),crime1.getID());
+                startActivity(intent1);
+                return true;
             case R.id.show_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
                 getActivity().invalidateOptionsMenu();
                 updateSubtitle();
                 return true;
+            case R.id.rem_all_crimes:
+                CrimeLab.get(getActivity()).remAllCrimes();
+                getActivity().invalidateOptionsMenu();
+                updateUI();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -106,7 +142,7 @@ public class CrimeListFragment extends Fragment {
     private void updateSubtitle(){
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         int crimeCount = crimeLab.getCrimes().size();
-        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural, crimeCount,crimeCount);
         if(!mSubtitleVisible)
             subtitle = null;
         AppCompatActivity appCompatActivity = (AppCompatActivity) getActivity();
@@ -117,13 +153,29 @@ public class CrimeListFragment extends Fragment {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
         updateSubtitle();
+
+        if(CrimeLab.get(getActivity()).getCrimes().size() == 0){
+            mNewCrimeButton.setVisibility(View.VISIBLE);
+            mNewSerioCrimeButton.setVisibility(View.VISIBLE);
+        }
+        else{
+            mNewCrimeButton.setVisibility(View.GONE);
+            mNewSerioCrimeButton.setVisibility(View.GONE);
+        }
+
+
         if(mAdapter == null){
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         }
-        else
+        else{
+            mAdapter.mCrimes = crimes;
             mAdapter.notifyDataSetChanged();
+        }
+
     }
+
+
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mTitleTextVIew;
@@ -137,7 +189,21 @@ public class CrimeListFragment extends Fragment {
             mCrime = crime;
             mTitleTextVIew.setText(mCrime.getTitle());
             mDateTextView.setText(dateFormat.format(mCrime.getDate()));
+            mCallPoliceButton.setVisibility(crime.isSeriously() ? View.VISIBLE : View.GONE);
             mSolvedImageView.setVisibility(crime.isSolved() ? View.VISIBLE : View.GONE);
+            mSolvedImageView.setBackgroundColor(crime.isSeriously() ?
+                    getResources().getColor(R.color.colorPrimary):
+                    getResources().getColor(R.color.white));
+            mDateTextView.setBackgroundColor(crime.isSeriously() ?
+                    getResources().getColor(R.color.colorPrimaryDark):
+                    getResources().getColor(R.color.white));
+            mTitleTextVIew.setBackgroundColor(crime.isSeriously() ?
+                    getResources().getColor(R.color.colorPrimary):
+                    getResources().getColor(R.color.white));
+            mDateTextView.setTextColor(crime.isSeriously() ?
+                    getResources().getColor(R.color.alice_blue):
+                    getResources().getColor(R.color.gray));
+
         }
 
         public CrimeHolder(LayoutInflater inflater, ViewGroup parent){
@@ -146,18 +212,8 @@ public class CrimeListFragment extends Fragment {
 
             mTitleTextVIew = (TextView) itemView.findViewById(R.id.crime_title);
             mDateTextView = (TextView) itemView.findViewById(R.id.crime_date);
-            mSolvedImageView = (ImageView) itemView.findViewById(R.id.crime_solved);
-            itemView.setOnClickListener(this);
-        }
-
-        public CrimeHolder(LayoutInflater inflater, ViewGroup parent, boolean seriously){
-            super(inflater.inflate(R.layout.list_item_crime_most_serious, parent,false));
-
-            mTitleTextVIew = (TextView) itemView.findViewById(R.id.crime_title);
-            mDateTextView = (TextView) itemView.findViewById(R.id.crime_date);
             mCallPoliceButton = (ImageButton) itemView.findViewById(R.id.police_button);
             mSolvedImageView = (ImageView) itemView.findViewById(R.id.crime_solved);
-
             itemView.setOnClickListener(this);
             mCallPoliceButton.setOnClickListener(this);
         }
@@ -183,29 +239,18 @@ public class CrimeListFragment extends Fragment {
         @Override
         public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int position) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            if(getItemViewType(position) == 1)
-                return new CrimeHolder(layoutInflater, parent);
-            else
-                return new CrimeHolder(layoutInflater, parent, true);
+            return new CrimeHolder(layoutInflater, parent);
         }
 
         @Override
         public void onBindViewHolder(@NonNull CrimeHolder crimeHolder, int position) {
-            Crime crime = mCrimes.get(position);
+            Crime crime = mCrimes.get(crimeHolder.getLayoutPosition());
             crimeHolder.bind(crime);
         }
 
         @Override
         public int getItemCount() {
             return mCrimes.size();
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if(mCrimes.get(position).isSeriously())
-                return 2;
-            else
-                return 1;
         }
     }
 }
