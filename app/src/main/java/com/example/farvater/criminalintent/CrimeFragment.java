@@ -81,6 +81,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -99,14 +106,16 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mLastCrimeButton.setOnClickListener(this);
         mDellCrimeButton.setOnClickListener(this);
 
-        mTitleField.setText(mCrime.getTitle());
         updateDate();
+
+        mTitleField.setText(mCrime.getTitle());
         mSolvedCheckBox.setChecked(mCrime.isSolved());
         mIsSeriouslyCheckBox.setChecked(mCrime.isSeriously());
         mIsSeriouslyCheckBox.setEnabled(false);
         mDateButton.setOnClickListener(this);
         mTimeButton.setOnClickListener(this);
-        Toast.makeText(getContext(),String.valueOf(mCrime.isSeriously()),Toast.LENGTH_SHORT).show();
+
+    Toast.makeText(getContext(),String.valueOf(mCrime.isSeriously()),Toast.LENGTH_SHORT).show();
 
         if(mCurrentPosition == 0){
             mFirstCrimeButton.setVisibility(INVISIBLE);
@@ -137,7 +146,6 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        //mDateButton.setText(mCrime.getDate().toString());
 
         mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override

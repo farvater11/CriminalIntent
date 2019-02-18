@@ -73,6 +73,9 @@ public class DatePickerFragment extends DialogFragment {
                 Date date = new GregorianCalendar(year,month,day,hour,minutes).getTime();
                 sendResult(Activity.RESULT_OK, date);
                 getActivity().getSupportFragmentManager().beginTransaction().remove(DatePickerFragment.this).commit();
+
+
+                getActivity().finish();
             }
         });
         return v;
