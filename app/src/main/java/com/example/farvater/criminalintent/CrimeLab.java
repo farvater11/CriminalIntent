@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.farvater.criminalintent.database.Crime.CrimeBaseHelper;
 import com.example.farvater.criminalintent.database.Crime.CrimeCursorWrapper;
@@ -50,9 +49,11 @@ public class CrimeLab {
 
     public void remCrime(Crime c){
         //mCrimes.remove(c);
+             mDatabase.delete(CrimeTable.NAME,CrimeTable.Cols.UUID + "=?", new String[]{c.getID().toString()});
     }
     public void remAllCrimes(){
         //mCrimes.clear();
+             mDatabase.delete(CrimeTable.NAME,null, null);
     }
 
     public List<Crime> getCrimes(){

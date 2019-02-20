@@ -80,14 +80,12 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCurrentPosition = (int) getArguments().getInt(ARG_CRIME_POS);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
-        Log.d("KEY_changed date", "created" + mCrime.getTitle() + "_time_" + mCrime.getDate().toString());
     }
 
     @Override
     public void onPause() {
         super.onPause();
         CrimeLab.get(getActivity()).updateCrime(mCrime);
-        Log.d("KEY_changed date", "saved "+ mCrime.getTitle()+""+mCrime.getDate().toString());
         //CrimeLab.get(getActivity()).getCrime(mCrime.getID()).getDate().toString
     }
 
