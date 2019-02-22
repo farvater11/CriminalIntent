@@ -1,6 +1,8 @@
 package com.example.farvater.criminalintent;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -43,6 +45,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String ARG_CRIME_POS = "cur_pos";
     private static final String DIALOG_DATE = "DialogDate";
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private Crime mCrime;
@@ -57,6 +60,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private ImageButton mDellCrimeButton;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Button mCallButton;
     private Intent pickContact;
 
 
@@ -87,6 +91,8 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
 
             Cursor cursor = getActivity().getContentResolver().
                     query(contactUri, queryFields, null,null, null);
+
+
             try{
                 if(cursor.getCount() == 0)
                     return;
@@ -164,11 +170,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mLastCrimeButton = (ImageButton) v.findViewById(R.id.last_crime_button);
         mReportButton = (Button) v.findViewById(R.id.crime_report);
         mSuspectButton = (Button) v.findViewById(R.id.crime_suspect);
+        mCallButton = (Button) v.findViewById(R.id.call);
         mFirstCrimeButton.setOnClickListener(this);
         mLastCrimeButton.setOnClickListener(this);
         mDellCrimeButton.setOnClickListener(this);
         mReportButton.setOnClickListener(this);
         mSuspectButton.setOnClickListener(this);
+        mCallButton.setOnClickListener(this);
         mDateButton.setOnClickListener(this);
         mTimeButton.setOnClickListener(this);
 
@@ -227,6 +235,28 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         return v;
     }
 
+    private void showContacts(){
+        //requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+        Cursor cursor = getActivity().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null,
+                "DISPLAY_NAME = ?",  new String[]{mCrime.getSuspect()}, null);
+        if (cursor.moveToFirst()) {
+            String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+
+            Cursor phoneCursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
+                    new String[]{contactId},
+                    null,
+                    null);
+
+            while (phoneCursor.moveToNext()) {
+                String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                Intent intent2 = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", number, null));
+                startActivity(intent2);
+            }
+        }
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -251,23 +281,19 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 getActivity().finish();
                 break;
             case R.id.crime_report:
-                /*Intent intent1 = new Intent(Intent.ACTION_SEND);
-                intent1.setType("text/plain");
-                intent1.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
-                intent1.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-                intent1 = Intent.createChooser(intent1, getString(R.string.send_report));
-                startActivity(intent1);*/
-
                 ShareCompat.IntentBuilder.from(getActivity())
                 .setType("text/plain")
                 .setText(getCrimeReport())
                 .setSubject(getString(R.string.crime_report_subject))
                 .setChooserTitle(R.string.send_report)
                 .startChooser();
-
                 break;
             case R.id.crime_suspect:
                 startActivityForResult(pickContact, REQUEST_CONTACT);
+                break;
+            case R.id.call:
+                showContacts();
+                //requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
                 break;
         }
     }
