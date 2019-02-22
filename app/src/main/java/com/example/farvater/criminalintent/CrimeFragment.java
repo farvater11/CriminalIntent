@@ -2,6 +2,7 @@ package com.example.farvater.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -55,6 +57,8 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private ImageButton mDellCrimeButton;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Intent pickContact;
+
 
 
     public static CrimeFragment newInstance(UUID uuid, int position){
@@ -141,13 +145,14 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragmen_crime, container, false);
+
+        pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 
         mTitleField = (EditText) v.findViewById(R.id.crime_title);
         mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
@@ -212,6 +217,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 mCrime.setSolved(isChecked);
             }
         });
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        if(packageManager.resolveActivity(pickContact,PackageManager.MATCH_DEFAULT_ONLY) == null)
+            mSuspectButton.setEnabled(false);
+
+
+
         return v;
     }
 
@@ -239,12 +251,20 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 getActivity().finish();
                 break;
             case R.id.crime_report:
-                Intent intent1 = new Intent(Intent.ACTION_SEND);
+                /*Intent intent1 = new Intent(Intent.ACTION_SEND);
                 intent1.setType("text/plain");
                 intent1.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
                 intent1.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
                 intent1 = Intent.createChooser(intent1, getString(R.string.send_report));
-                startActivity(intent1);
+                startActivity(intent1);*/
+
+                ShareCompat.IntentBuilder.from(getActivity())
+                .setType("text/plain")
+                .setText(getCrimeReport())
+                .setSubject(getString(R.string.crime_report_subject))
+                .setChooserTitle(R.string.send_report)
+                .startChooser();
+
                 break;
             case R.id.crime_suspect:
                 startActivityForResult(pickContact, REQUEST_CONTACT);
