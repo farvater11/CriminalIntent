@@ -5,16 +5,19 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -28,12 +31,15 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.xml.transform.Result;
@@ -45,9 +51,9 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String ARG_CRIME_POS = "cur_pos";
     private static final String DIALOG_DATE = "DialogDate";
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
+    private static final int REQUEST_PHOTO = 2;
     private Crime mCrime;
     private int mCurrentPosition;
     private EditText mTitleField;
@@ -61,7 +67,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private Button mReportButton;
     private Button mSuspectButton;
     private Button mCallButton;
+    private ImageButton mPhotoImageButton;
+    private ImageView mPhotoView;
+    private File mPhotoFile;
+
+
     private Intent pickContact;
+    private Intent captureImage;
 
 
 
@@ -142,6 +154,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCurrentPosition = (int) getArguments().getInt(ARG_CRIME_POS);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
     }
 
     @Override
@@ -171,6 +184,9 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mReportButton = (Button) v.findViewById(R.id.crime_report);
         mSuspectButton = (Button) v.findViewById(R.id.crime_suspect);
         mCallButton = (Button) v.findViewById(R.id.call);
+        mPhotoImageButton = (ImageButton) v.findViewById(R.id.crime_camera);
+        mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+        mPhotoImageButton.setOnClickListener(this);
         mFirstCrimeButton.setOnClickListener(this);
         mLastCrimeButton.setOnClickListener(this);
         mDellCrimeButton.setOnClickListener(this);
@@ -231,6 +247,11 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
             mSuspectButton.setEnabled(false);
 
 
+        captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        boolean canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(packageManager) != null;
+
+        mPhotoImageButton.setEnabled(canTakePhoto);
 
         return v;
     }
@@ -293,7 +314,21 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.call:
                 showContacts();
-                //requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+                break;
+            case R.id.crime_camera:
+                Uri uri = FileProvider.getUriForFile(getActivity(),
+                        "com.example.farvater.criminalintent.fileprovider",
+                        mPhotoFile);
+                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+                List<ResolveInfo> cameraActivities = getActivity().getPackageManager()
+                        .queryIntentActivities(captureImage,PackageManager.MATCH_DEFAULT_ONLY);
+
+                for(ResolveInfo activity : cameraActivities){
+                    getActivity().grantUriPermission(activity.activityInfo.packageName,
+                            uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                }
+                startActivityForResult(captureImage, REQUEST_CONTACT);
                 break;
         }
     }

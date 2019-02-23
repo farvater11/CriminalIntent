@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.example.farvater.criminalintent.database.Crime.CrimeBaseHelper;
 import com.example.farvater.criminalintent.database.Crime.CrimeCursorWrapper;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class CrimeLab {
     public void remCrime(Crime c){
              mDatabase.delete(CrimeTable.NAME,CrimeTable.Cols.UUID + "=?", new String[]{c.getID().toString()});
     }
+
     public void remAllCrimes(){
              mDatabase.delete(CrimeTable.NAME,null, null);
     }
@@ -75,6 +77,19 @@ public class CrimeLab {
         }
     }
 
+    public void updateCrime(Crime crime){
+        String uuidString = crime.getID().toString();
+        ContentValues value = getContentValues(crime);
+
+        mDatabase.update(CrimeTable.NAME, value, CrimeTable.Cols.UUID + " =?",
+                new String[] {uuidString});
+    }
+
+    public File getPhotoFile(Crime crime){
+        File fileDir = mContext.getFilesDir();
+        return new File(fileDir, crime.getPhotoFileName());
+    }
+
     private static ContentValues getContentValues (Crime crime){
         ContentValues values = new ContentValues();
         values.put(CrimeTable.Cols.UUID, crime.getID().toString());
@@ -84,14 +99,6 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.SERIOUSLY, crime.isSeriously() ? 1 : 0);
         values.put(CrimeTable.Cols.SUSPECT, crime.getSuspect());
         return values;
-    }
-
-    public void updateCrime(Crime crime){
-        String uuidString = crime.getID().toString();
-        ContentValues value = getContentValues(crime);
-
-        mDatabase.update(CrimeTable.NAME, value, CrimeTable.Cols.UUID + " =?",
-                new String[] {uuidString});
     }
 
     private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs){
