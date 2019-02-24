@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Log;
 
 public class PictureUtils {
     public static Bitmap getScaledBitmap(String path, Activity activity){
@@ -32,6 +33,7 @@ public class PictureUtils {
 
         options = new BitmapFactory.Options();
         options.inSampleSize = inSampleSize;
+        Log.d("KEY_SIZE_PHOTO" ,"UTILS: size photo " + destWidth);
 
         return BitmapFactory.decodeFile(path,options);
     }

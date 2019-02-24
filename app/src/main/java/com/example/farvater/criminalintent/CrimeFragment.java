@@ -6,7 +6,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -17,12 +19,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.graphics.BitmapCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -64,6 +69,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private ImageButton mPhotoImageButton;
     private ImageView mPhotoView;
     private File mPhotoFile;
+    private Point mSizeOfPhotoView = new Point();
 
 
     private Intent pickContact;
@@ -107,6 +113,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
                 mCallButton.setEnabled(true);
+
             }
             finally {
                 cursor.close();
@@ -175,6 +182,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         View v = inflater.inflate(R.layout.fragmen_crime, container, false);
 
         pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+
 
         mTitleField = (EditText) v.findViewById(R.id.crime_title);
         mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
@@ -260,10 +268,26 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
 
 
         captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
         boolean canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(packageManager) != null;
-
         mPhotoImageButton.setEnabled(canTakePhoto);
+
+        ViewTreeObserver vto = mPhotoView.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // Получаем размеры
+                mSizeOfPhotoView.x = mPhotoView.getWidth();
+                mSizeOfPhotoView.y = mPhotoView.getHeight();
+                updatePhotoView();
+                // Внимание! Код ниже обязателен: нужно не забыть отписать слушателя, так как в данном случае больше он нам не понадобится
+                ViewTreeObserver obs = mPhotoView.getViewTreeObserver();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    obs.removeOnGlobalLayoutListener(this);
+                } else {
+                    obs.removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
 
         return v;
     }
@@ -294,8 +318,10 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         if(mPhotoFile == null|| !mPhotoFile.exists())
             mPhotoView.setImageDrawable(null);
         else{
-            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            //Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), mSizeOfPhotoView.x, mSizeOfPhotoView.y);
             mPhotoView.setImageBitmap(bitmap);
+
         }
     }
 
