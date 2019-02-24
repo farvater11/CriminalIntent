@@ -12,6 +12,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
@@ -42,6 +43,8 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String ARG_CRIME_POS = "cur_pos";
     private static final String DIALOG_DATE = "DialogDate";
+    private static final String DIALOG_PHOTO = "DialogPhoto";
+
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO = 2;
@@ -195,6 +198,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mCallButton.setOnClickListener(this);
         mDateButton.setOnClickListener(this);
         mTimeButton.setOnClickListener(this);
+        mPhotoView.setOnClickListener(this);
 
         updateText();
         updatePhotoView();
@@ -203,10 +207,13 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mSolvedCheckBox.setChecked(mCrime.isSolved());
         mIsSeriouslyCheckBox.setChecked(mCrime.isSeriously());
         mIsSeriouslyCheckBox.setEnabled(false);
-        mCallButton.setEnabled(false);
 
-        if(mCrime.getSuspect() != null)
+        if(mCrime.getSuspect() != null){
+            mCallButton.setEnabled(true);
             mSuspectButton.setText(mCrime.getSuspect());
+        }
+        else
+            mCallButton.setEnabled(false);
 
 
 
@@ -343,6 +350,11 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                             uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 }
                 startActivityForResult(captureImage, REQUEST_PHOTO);
+                break;
+            case R.id.crime_photo:
+                FragmentManager fragmentManager1 = getFragmentManager();
+                DialogFragment enlargedPhotoFragment = EnlargedPhotoFragment.newInstance(mPhotoFile);
+                enlargedPhotoFragment.show(fragmentManager1,DIALOG_PHOTO);
                 break;
         }
     }

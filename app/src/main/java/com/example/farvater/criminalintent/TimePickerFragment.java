@@ -50,7 +50,6 @@ public class TimePickerFragment extends DialogFragment {
         mTimePicker.setIs24HourView(true);
         mTimePicker.setCurrentHour(hour);
         mTimePicker.setCurrentMinute(minutes);
-        Log.d("KEY_TIME", "Timefragment created");
 
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.time_picker_title)
