@@ -1,19 +1,17 @@
 package com.example.farvater.criminalintent;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
@@ -21,28 +19,21 @@ import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
-import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import javax.xml.transform.Result;
 
 import static android.widget.CompoundButton.*;
 
@@ -94,9 +85,9 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         if(requestCode == REQUEST_DATE){
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
-            updateDate();
+            updateText();
         }
-        else if((requestCode == REQUEST_CONTACT)&&(data != null)){
+        else if(requestCode == REQUEST_CONTACT && data != null){
             Uri contactUri = data.getData();
             String[] queryFields = new String[]{
                     ContactsContract.Contacts.DISPLAY_NAME};
@@ -112,19 +103,28 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                 String suspect = cursor.getString(0);
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
+                mCallButton.setEnabled(true);
             }
             finally {
                 cursor.close();
             }
         }
+        else if(requestCode == REQUEST_PHOTO){
+            Uri uri = FileProvider.getUriForFile(getActivity(),
+                    "com.example.farvater.criminalintent.fileprovider",
+                    mPhotoFile);
+            getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            updatePhotoView();
+        }
 
     }
 
-    private void updateDate() {
+    private void updateText() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE '\n' MMM dd, YYYY");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         mDateButton.setText(dateFormat.format(mCrime.getDate()));
         mTimeButton.setText(timeFormat.format(mCrime.getDate()));
+
     }
 
     private String getCrimeReport(){
@@ -196,14 +196,19 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         mDateButton.setOnClickListener(this);
         mTimeButton.setOnClickListener(this);
 
-        updateDate();
+        updateText();
+        updatePhotoView();
 
         mTitleField.setText(mCrime.getTitle());
         mSolvedCheckBox.setChecked(mCrime.isSolved());
         mIsSeriouslyCheckBox.setChecked(mCrime.isSeriously());
         mIsSeriouslyCheckBox.setEnabled(false);
+        mCallButton.setEnabled(false);
+
         if(mCrime.getSuspect() != null)
             mSuspectButton.setText(mCrime.getSuspect());
+
+
 
         if(mCurrentPosition == 0){
             mFirstCrimeButton.setVisibility(INVISIBLE);
@@ -278,6 +283,15 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void updatePhotoView(){
+        if(mPhotoFile == null|| !mPhotoFile.exists())
+            mPhotoView.setImageDrawable(null);
+        else{
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -328,7 +342,7 @@ public class CrimeFragment extends Fragment implements View.OnClickListener {
                     getActivity().grantUriPermission(activity.activityInfo.packageName,
                             uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 }
-                startActivityForResult(captureImage, REQUEST_CONTACT);
+                startActivityForResult(captureImage, REQUEST_PHOTO);
                 break;
         }
     }

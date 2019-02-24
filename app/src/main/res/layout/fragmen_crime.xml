@@ -17,10 +17,10 @@
                 android:id="@+id/crime_photo"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:background="@color/gray"/>
+                />
             <ImageButton
                 android:id="@+id/crime_camera"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_make_photo"/>
